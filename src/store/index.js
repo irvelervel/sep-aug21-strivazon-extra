@@ -9,6 +9,8 @@ import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 // our storage currently points to the localStorage
 
+import { encryptTransform } from 'redux-persist-transform-encrypt'
+
 // my suggestion to start is to think as the FIRST THING about your STORE SHAPE
 // I'm planning to use the redux store for sharing the CART and also give to the store
 // initial values
@@ -42,6 +44,11 @@ export const initialState = {
 const persistConfig = {
   key: 'root',
   storage,
+  transforms: [
+    encryptTransform({
+      secretKey: process.env.REACT_APP_ENCRYPT_KEY,
+    }),
+  ],
 }
 
 const bigReducer = combineReducers({
