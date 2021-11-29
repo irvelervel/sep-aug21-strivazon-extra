@@ -1,75 +1,64 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import BookList from "./BookList";
 import BookDetail from "./BookDetail";
 import { Col, Row, Alert, Spinner } from "react-bootstrap";
-import { connect } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { getBooksAction } from "../actions";
 
-const mapStateToProps = (state) => ({
-  booksInStock: state.books.stock,
-  booksError: state.books.isError,
-  booksLoading: state.books.isLoading
-})
+const BookStore = () => {
 
-const mapDispatchToProps = (dispatch) => ({
-  getBooks: () => {
+  const [bookSelected, setBookSelected] = useState(null)
+  const dispatch = useDispatch()
+
+  // const { stock: booksInStock, isError: booksError, isLoading: booksLoading } = useSelector(state => state.books)
+
+  const booksInStock = useSelector(state => state.books.stock)
+  const booksError = useSelector(state => state.books.isError)
+  const booksLoading = useSelector(state => state.books.isLoading)
+
+  useEffect(() => {
     dispatch(getBooksAction())
-  }
-})
+  }, [])
 
-class BookStore extends Component {
-  state = {
-    bookSelected: null,
-  };
+  const changeBook = (book) => setBookSelected(book);
 
-  componentDidMount = async () => {
-    // we need to dispatch getBooksAction here!
-    // but this component is still not connected to the redux store
-    // so let's connect it first
-    this.props.getBooks()
-  };
+  return (
+    <Row>
+      {
+        booksLoading ? (
+          <Spinner animation="border" variant="success" style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%'
+          }} />
+        ) : (
+          <>
+            <Col md={4}>
+              {
+                booksError ? <div>
+                  <Alert variant="danger">
+                    ERROR WHILE FETCHING
+                  </Alert>
+                </div> : (
+                  <BookList
+                    bookSelected={bookSelected}
+                    changeBook={changeBook}
+                    books={booksInStock}
+                  />
+                )
+              }
+            </Col>
+            <Col md={8}>
+              <BookDetail
+                bookSelected={bookSelected}
+              />
+            </Col>
+          </>
+        )
+      }
 
-  changeBook = (book) => this.setState({ bookSelected: book });
-
-  render() {
-    return (
-      <Row>
-        {
-          this.props.booksLoading ? (
-            <Spinner animation="border" variant="success" style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%'
-            }}/>
-          ) : (
-            <>
-              <Col md={4}>
-                {
-                  this.props.booksError ? <div>
-                    <Alert variant="danger">
-                      ERROR WHILE FETCHING
-                    </Alert>
-                  </div> : (
-                    <BookList
-                      bookSelected={this.state.bookSelected}
-                      changeBook={this.changeBook}
-                      books={this.props.booksInStock}
-                    />
-                  )
-                }
-              </Col>
-              <Col md={8}>
-                <BookDetail
-                  bookSelected={this.state.bookSelected}
-                />
-              </Col>
-            </>
-          )
-        }
-
-      </Row>
-    );
-  }
+    </Row>
+  );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(BookStore);
+export default BookStore;

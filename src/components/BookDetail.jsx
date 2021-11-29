@@ -1,86 +1,91 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import { Col, Row } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
-import { connect } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { addToCartAction } from "../actions";
 
-const mapStateToProps = (state) => ({
-  // this is a dummy mapStateToProps, we're writing it just to be able to declare mapDispatchToProps
-  // I'm not returning any key here because my component doesn't need to read anything from the state
-  userName: state.user.name
-})
+// const mapStateToProps = (state) => ({
+//   // this is a dummy mapStateToProps, we're writing it just to be able to declare mapDispatchToProps
+//   // I'm not returning any key here because my component doesn't need to read anything from the state
+//   userName: state.user.name
+// })
 // both these two are ALWAYS functions returning a single object
-const mapDispatchToProps = (dispatch) => ({
-  addToCart: function (bookToAdd) {
-    dispatch(addToCartAction(bookToAdd))
-  }
-})
+// const mapDispatchToProps = (dispatch) => ({
+//   addToCart: function (bookToAdd) {
+//     dispatch(addToCartAction(bookToAdd))
+//   }
+// })
 
-class BookDetail extends Component {
-  state = {
-    book: null,
-  };
+const BookDetail = ({ bookSelected }) => {
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.bookSelected !== this.props.bookSelected) {
-      this.setState({
-        book: this.props.bookSelected,
-      });
-    }
-  }
+  const [book, setBook] = useState(null)
 
-  render() {
-    return (
-      <div className="mt-3">
-        {this.state.book ? (
-          <>
-            <Row>
-              <Col sm={12}>
-                <h1>{this.state.book.title}</h1>
-              </Col>
-            </Row>
-            <Row className="mt-3">
-              <Col sm={4}>
-                <div className="mt-3">
-                  <img
-                    className="book-cover"
-                    src={this.state.book.imageUrl}
-                    alt="book selected"
-                  />
-                </div>
-              </Col>
-              <Col sm={8}>
-                <p>
-                  <span className="font-weight-bold">Description:</span>
-                  {this.state.book.description}
-                </p>
-                <p>
-                  <span className="font-weight-bold">Price:</span>
-                  {this.state.book.price}
-                </p>
-                {
-                  this.props.userName ? (
-                    <Button color="primary" onClick={() => this.props.addToCart(this.state.book)}>
-                      ADD TO CART
-                    </Button>
-                  ) : <p>Log in to add this item to your cart!</p>
-                }
-              </Col>
-            </Row>
-          </>
-        ) : (
+  const userName = useSelector(state => state.user.name)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    setBook(bookSelected)
+  }, [bookSelected])
+
+  // the useEffect is doing exactly the same as this:
+  // componentDidUpdate(prevProps) {
+  //   if (prevProps.bookSelected !== this.props.bookSelected) {
+  //     this.setState({
+  //       book: this.props.bookSelected,
+  //     });
+  //   }
+  // }
+
+  return (
+    <div className="mt-3">
+      {book ? (
+        <>
           <Row>
             <Col sm={12}>
-              <h3>Please select a book!</h3>
+              <h1>{book.title}</h1>
             </Col>
           </Row>
-        )}
-      </div>
-    );
-  }
+          <Row className="mt-3">
+            <Col sm={4}>
+              <div className="mt-3">
+                <img
+                  className="book-cover"
+                  src={book.imageUrl}
+                  alt="book selected"
+                />
+              </div>
+            </Col>
+            <Col sm={8}>
+              <p>
+                <span className="font-weight-bold">Description:</span>
+                {book.description}
+              </p>
+              <p>
+                <span className="font-weight-bold">Price:</span>
+                {book.price}
+              </p>
+              {
+                userName ? (
+                  <Button color="primary" onClick={() => dispatch(addToCartAction(book))}>
+                    ADD TO CART
+                  </Button>
+                ) : <p>Log in to add this item to your cart!</p>
+              }
+            </Col>
+          </Row>
+        </>
+      ) : (
+        <Row>
+          <Col sm={12}>
+            <h3>Please select a book!</h3>
+          </Col>
+        </Row>
+      )}
+    </div>
+  );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(BookDetail);
+export default BookDetail
 
 // in here I don't need to read anything from the state
 // my goal is to add an element to the cart, so I need to INTERACT with the state

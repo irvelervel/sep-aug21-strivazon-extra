@@ -6,7 +6,7 @@ import FormControl from "react-bootstrap/FormControl";
 // not in runtime, mostly, but in BUNDLE SIZE
 import { FaShoppingCart } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom'
-import { connect } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useState } from "react";
 import { setUsernameAction } from "../actions";
 
@@ -15,25 +15,31 @@ import { setUsernameAction } from "../actions";
 // we just have cart so far, and the length of the products array can be found in
 // cart.products.length
 
-const mapStateToProps = (state) => ({
-  cartLength: state.cart.content.length,
-  userName: state.user.name
-})
+// const mapStateToProps = (state) => ({
+//   cartLength: state.cart.content.length,
+//   userName: state.user.name
+// })
 
-const mapDispatchToProps = (dispatch) => ({
-  setReduxUsername: (name) => {
-    dispatch(setUsernameAction(name))
-  }
-})
+// const mapDispatchToProps = (dispatch) => ({
+//   setReduxUsername: (name) => {
+//     dispatch(setUsernameAction(name))
+//   }
+// })
 
-const CartIndicator = ({ cartLength, userName, setReduxUsername }) => {
+const CartIndicator = () => {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
+
+  const cartLength = useSelector(state => state.cart.content.length)
+  const { user: { name } } = useSelector(state => state)
+  // destructuring name out of the destructuring of user :O
+
+  const dispatch = useDispatch()
 
   return (
     <div className="ml-auto mt-2">
       {
-        userName ? (
+        name ? (
           <Button color="primary" onClick={() => navigate("/cart")}>
             <FaShoppingCart />
             <span className="ml-2">{cartLength}</span>
@@ -48,7 +54,7 @@ const CartIndicator = ({ cartLength, userName, setReduxUsername }) => {
               onChange={e => setUsername(e.target.value)}
             />
             <InputGroup.Append>
-              <Button variant="outline-secondary" onClick={() => setReduxUsername(username)}>Login!</Button>
+              <Button variant="outline-secondary" onClick={() => dispatch(setUsernameAction(username))}>Login!</Button>
             </InputGroup.Append>
           </InputGroup>
         )
@@ -57,7 +63,7 @@ const CartIndicator = ({ cartLength, userName, setReduxUsername }) => {
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CartIndicator)
+export default CartIndicator
 // this is called a HOC (higher order component)
 
 // connect can take up to 2 arguments:
