@@ -5,6 +5,10 @@ import userReducer from '../reducers/user'
 
 import thunk from 'redux-thunk'
 
+import { persistStore, persistReducer } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
+// our storage currently points to the localStorage
+
 // my suggestion to start is to think as the FIRST THING about your STORE SHAPE
 // I'm planning to use the redux store for sharing the CART and also give to the store
 // initial values
@@ -35,14 +39,24 @@ export const initialState = {
   // properties
 }
 
+const persistConfig = {
+  key: 'root',
+  storage,
+}
+
 const bigReducer = combineReducers({
   cart: cartReducer,
   user: userReducer,
   books: booksReducer,
 })
 
-const configureStore = createStore(bigReducer, initialState, aComposeThatAlwaysWorks(applyMiddleware(thunk)))
+const persistedBigReducer = persistReducer(persistConfig, bigReducer)
+
+const configureStore = createStore(persistedBigReducer, initialState, aComposeThatAlwaysWorks(applyMiddleware(thunk)))
+
+export const persistor = persistStore(configureStore)
 
 export default configureStore
 
 // redux-thunk is going to be helpful for handling async operations in the redux flow
+// now we're injecting the storage logic for making our redux-store persistent
